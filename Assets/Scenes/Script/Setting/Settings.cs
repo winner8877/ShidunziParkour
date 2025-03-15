@@ -18,6 +18,7 @@ public class Settings : MonoBehaviour
     public InputField MusicGameSpeed;
     public Toggle isAutoPlay;
     public Toggle notVibrate;
+    public InputField MusicGameOffsetMs;
     void Awake(){
         MusicVolume.value = DataStorager.settings.MusicVolume;
         SoundVolume.value = DataStorager.settings.SoundVolume;
@@ -26,6 +27,7 @@ public class Settings : MonoBehaviour
         isAutoPlay.isOn = DataStorager.settings.isAutoPlay;
         notVibrate.isOn = DataStorager.settings.notVibrate;
         MaxLife.text = DataStorager.maxLife.count.ToString();
+        MusicGameOffsetMs.text = DataStorager.settings.offsetMs.ToString();
         if(DataStorager.settings.CustomMaxLife > 0){
             CustomMaxLife.text = DataStorager.settings.CustomMaxLife.ToString();
         } else {
@@ -74,6 +76,14 @@ public class Settings : MonoBehaviour
             {
                 DataStorager.settings.MusicGameSpeed = 1;
             }
+        }
+        if (!int.TryParse(MusicGameOffsetMs.text, out int coffset))
+        {
+            DataStorager.settings.offsetMs = 0;
+        }
+        else
+        {
+            DataStorager.settings.offsetMs = coffset;
         }
         // 保存
         DataStorager.SaveSettings();

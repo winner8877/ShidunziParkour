@@ -50,5 +50,6 @@ public class DataManager
         public float MusicGameSpeed;
         public bool isAutoPlay;
         public bool notVibrate;
+        public int offsetMs;
     }
 }

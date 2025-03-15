@@ -10,7 +10,7 @@ public class LandGenerator : MonoBehaviour
 
     public const int LAND_LENGTH = 80;
     public const int OFFSET = 30;
-    public const int PRE_OFFSET = 100;
+    public const int PRE_OFFSET = 200;
     // Start is called before the first frame update
     void Start()
     {

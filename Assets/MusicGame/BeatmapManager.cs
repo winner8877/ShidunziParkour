@@ -16,7 +16,7 @@ public class BeatmapManager : MonoBehaviour
     float OnPlayingTime = 0;
     float BeforeTime = 2;
     float BPM = 0;
-    float offset = 0;
+    float offset = DataStorager.settings.offsetMs / 1000;
     float videoOffset = 0;
     float MaxPoint = 0;
     float NowPoint = 0;
@@ -46,6 +46,9 @@ public class BeatmapManager : MonoBehaviour
     float last_change_time;
     float should_change_time;
     bool isJumped = false;
+    bool ready_to_change_bpm = false;
+    float should_change_bpm = 0;
+    float should_change_bpm_time = 0;
 
     string dataFolder;
 
@@ -95,15 +98,22 @@ public class BeatmapManager : MonoBehaviour
         if(!Directory.Exists(dataFolder)){
             Directory.CreateDirectory(dataFolder);
         }
+        float last_time = 0;
         foreach( string line in File.ReadAllText(path).Split("\n")){
-            float last_time = 0;
             string[] data = line.Split("=");
             if(data[0].Replace(" ","") == "bpm"){
                 BPM = float.Parse(data[1].Replace(" ",""));
+                remain_beats.Add(
+                    new SingleBeat(){
+                        type = (int)B_TYPE.BPM_TYPE,
+                        beat_time = 0,
+                        BPM = float.Parse(data[1].Replace(" ",""))
+                    }
+                );
                 continue;
             }
             if(data[0].Replace(" ","") == "offset"){
-                offset = float.Parse(data[1].Replace(" ",""));
+                offset += float.Parse(data[1].Replace(" ",""));
                 continue;
             }
             if(data[0].Replace(" ","") == "bg_offset"){
@@ -147,7 +157,8 @@ public class BeatmapManager : MonoBehaviour
             if(data[0] == "B"){
                 float slice_beat = float.Parse(data[3]) > 0 ? float.Parse(data[2]) / float.Parse(data[3]) : 0;
                 float beat_time = last_time + (float.Parse(data[1]) + slice_beat) * (60 / BPM) + offset;
-                last_time = beat_time;
+                last_time = beat_time - offset;
+                BPM = float.Parse(data[4]);
                 remain_beats.Add(
                     new SingleBeat(){
                         type = (int)B_TYPE.BPM_TYPE,
@@ -155,6 +166,7 @@ public class BeatmapManager : MonoBehaviour
                         BPM = float.Parse(data[4])
                     }
                 );
+                continue;
             }
         }
     }
@@ -256,8 +268,7 @@ public class BeatmapManager : MonoBehaviour
             }
             remain_beats.RemoveAt(0);
         }
-        if(remain_beats[0].type == (int)B_TYPE.BPM_TYPE && remain_beats[0].beat_time <= OnPlayingTime){
-            BPM = remain_beats[0].BPM;
+        if(remain_beats[0].type == (int)B_TYPE.BPM_TYPE){
             remain_beats.RemoveAt(0);
         }
         if(!isVideoPlaying){
@@ -296,6 +307,18 @@ public class BeatmapManager : MonoBehaviour
     enum Rating {SSSp,SSS,SSp,SS,Sp,S,AAA,AA,A,BBB,BB,B,C,D,F};
 
     void autoplay() {
+        if(auto_remain_beats[0].type == (int)B_TYPE.BPM_TYPE){
+            ready_to_change_bpm = true;
+            should_change_bpm_time = auto_remain_beats[0].beat_time;
+            should_change_bpm = auto_remain_beats[0].BPM;
+            auto_remain_beats.RemoveAt(0);
+        }
+        if(ready_to_change_bpm){
+            if(OnPlayingTime - BeforeTime >= should_change_bpm_time){
+                BPM = should_change_bpm;
+                ready_to_change_bpm = false;
+            }
+        }
         if(isAutoPlay){
             if(!detect_list.Contains(auto_remain_beats[0].type) && auto_remain_beats[0].type != (int)B_TYPE.FINISH){
                 auto_remain_beats.RemoveAt(0);
@@ -317,7 +340,7 @@ public class BeatmapManager : MonoBehaviour
                     last_change_time = OnPlayingTime - BeforeTime;
                     last_record = true;
                     float switch_time = (auto_remain_beats[0].beat_time - last_change_time) * 1 / 2;
-                    if(switch_time < 0.1){
+                    if(switch_time < 0.2){
                         switch_time = 0;
                     }
                     should_change_time = last_change_time + switch_time;
