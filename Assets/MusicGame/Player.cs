@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     public BeatmapManager beatmapManager;
     public const int MAX_TRACKS = 3;
     private float all_timer = 0;
+    private float loosen_time = 0;
     private bool toMoving = false;
     private bool isMoving = false;
     private bool isDrop = false;
@@ -65,6 +66,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        loosen_time += Time.deltaTime;
         handleKeyInput();
         handleFingerInput();
         updateGravity();
@@ -122,11 +124,14 @@ public class Player : MonoBehaviour
     }
     public void moveUp()
     {
-        if (checkGrouned())
+        if (checkGrouned() || loosen_time < 0.1)
         {
             // the_rigidbody.AddForce(Vector3.up * jumpStrength, ForceMode.Impulse);
             float new_speed = gravity * 60 / beatmapManager.getBPM();
             velocity += new Vector3(0,new_speed,0);
+            if(!isFlying){
+                loosen_time = 0;
+            }
             isFlying = true;
             // isGrounded = false;
         }
@@ -224,30 +229,31 @@ public class Player : MonoBehaviour
 
     void handleKeyInput()
     {
-        if (Input.GetButtonDown("Horizontal"))
-        {
-            if (Input.GetAxisRaw("Horizontal") < 0)
-            {
-                moveLeft();
-            }
-            else
-            {
-                moveRight();
+        KeyCode[] leftKeys = {KeyCode.A,KeyCode.LeftArrow};
+        foreach( KeyCode key in leftKeys ){
+            if(Input.GetKeyDown(key)){
+                 moveLeft();
             }
         }
-        if (Input.GetButtonDown("Jump"))
-        {
-            moveUp();
-        }
-        if (Input.GetButtonDown("Vertical"))
-        {
-            if (Input.GetAxisRaw("Vertical") < 0)
-            {
-                moveDown();
+
+        KeyCode[] rightKeys = {KeyCode.D,KeyCode.RightArrow};
+        foreach( KeyCode key in rightKeys ){
+            if(Input.GetKeyDown(key)){
+                 moveRight();
             }
-            else
-            {
-                moveUp();
+        }
+
+        KeyCode[] upKeys = {KeyCode.Space,KeyCode.W,KeyCode.UpArrow};
+        foreach( KeyCode key in upKeys ){
+            if(Input.GetKeyDown(key)){
+                 moveUp();
+            }
+        }
+
+        KeyCode[] downKeys = {KeyCode.DownArrow,KeyCode.S};
+        foreach( KeyCode key in downKeys ){
+            if(Input.GetKeyDown(key)){
+                 moveDown();
             }
         }
     }

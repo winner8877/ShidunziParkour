@@ -3,9 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Mirror.BouncyCastle.Asn1;
 using Newtonsoft.Json;
-using Unity.Entities.UniversalDelegates;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -14,7 +13,7 @@ using UnityEngine.Video;
 public class BeatmapManager : MonoBehaviour
 {
     float OnPlayingTime = 0;
-    float BeforeTime = 2;
+    float BeforeTime = 3;
     float BPM = 0;
     float offset = DataStorager.settings.offsetMs / 1000;
     float videoOffset = 0;
@@ -40,6 +39,11 @@ public class BeatmapManager : MonoBehaviour
     public GameObject ComboDisplay;
     public GameObject ResultCanvas;
     public GameObject AutoPlayImage;
+
+    // 谱面信息展示
+    public RawImage DisplayInfoImage;
+    public TMP_Text DisplayInfoText;
+    public LevelDisplayer levelDisplayer;
 
     // 自动游玩变量
     bool last_record = false;
@@ -92,6 +96,8 @@ public class BeatmapManager : MonoBehaviour
             texture.LoadImage(fileData); // 自动调整纹理大小
             BackForImage.texture = texture;
             BackForImage.GetComponent<AspectRatioFitter>().aspectRatio = (float)texture.width / texture.height;
+            DisplayInfoImage.texture = texture;
+            DisplayInfoImage.GetComponent<AspectRatioFitter>().aspectRatio = (float)texture.width / texture.height;
         }
         // 读取谱面
         string path = $"{dataFolder}/{beatmap_name}/data.sdz";
@@ -118,6 +124,14 @@ public class BeatmapManager : MonoBehaviour
             }
             if(data[0].Replace(" ","") == "bg_offset"){
                 videoOffset = float.Parse(data[1].Replace(" ",""));
+                continue;
+            }
+            if(data[0].Replace(" ","") == "title"){
+                DisplayInfoText.text = data[1].Replace(" ","");
+                continue;
+            }
+            if(data[0].Replace(" ","") == "level"){
+                levelDisplayer.level = float.Parse(data[1].Replace(" ",""));
                 continue;
             }
             data = line.Split(",");

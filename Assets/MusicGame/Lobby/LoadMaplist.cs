@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class LoadMaplist : MonoBehaviour
 {
