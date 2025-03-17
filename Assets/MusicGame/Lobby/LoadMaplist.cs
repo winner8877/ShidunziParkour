@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LoadMaplist : MonoBehaviour
 {
@@ -20,6 +21,9 @@ public class LoadMaplist : MonoBehaviour
 
     public GameObject SingleItem;
     public GameObject MapList;
+
+    static bool isDeleteState = false;
+    public Text deleteStateButtonText;
 
     private void Awake() {
         dataFolder = $"{Application.persistentDataPath}/music";
@@ -104,6 +108,18 @@ public class LoadMaplist : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(!isDeleteState){
+            deleteStateButtonText.text = "删除谱面";
+        } else {
+            deleteStateButtonText.text = "取消删除";
+        }
+    }
+
+    public static bool IsDeleting(){
+        return isDeleteState;
+    }
+
+    public static void ChangeDeleteState(){
+        isDeleteState = !isDeleteState;
     }
 }

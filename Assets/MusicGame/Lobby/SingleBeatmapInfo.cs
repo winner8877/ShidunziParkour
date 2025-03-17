@@ -1,3 +1,4 @@
+using SimpleFileBrowser;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -18,6 +19,13 @@ public class SingleBeatmapInfo : MonoBehaviour
     public Image backImage;
     public Image Rating;
     public Image levelImage;
+    public GameObject deleteButton;
+
+    string dataFolder;
+
+    private void Awake() {
+        dataFolder = $"{Application.persistentDataPath}/music";
+    }
 
     public void setBackground(Texture2D texture) {
         backImage.sprite = Sprite.Create(texture,
@@ -30,10 +38,16 @@ public class SingleBeatmapInfo : MonoBehaviour
         BeatmapInfo.beatmap_name = path;
         SceneManager.LoadScene("MusicGame");
     }
+
+    void DeleteMap(string path){
+        FileBrowserHelpers.DeleteDirectory($"{dataFolder}/{path}");
+        SceneManager.LoadScene("MusicLobby");
+    }
     // Start is called before the first frame update
     void Start()
     {
         gameObject.GetComponent<Button>().onClick.AddListener(() => StartGame(path));
+        deleteButton.GetComponent<Button>().onClick.AddListener(() => DeleteMap(path));
         title_object.text = title;
         descrip_object.text = description;
         if(max_rating < 15){
@@ -58,6 +72,6 @@ public class SingleBeatmapInfo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        deleteButton.SetActive(LoadMaplist.IsDeleting());
     }
 }

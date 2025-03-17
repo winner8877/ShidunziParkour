@@ -209,30 +209,57 @@ public class Move : MonoBehaviour
 
     void handleKeyInput()
     {
-        if (Input.GetButtonDown("Horizontal"))
-        {
-            if (Input.GetAxisRaw("Horizontal") < 0)
-            {
-                moveLeft();
-            }
-            else
-            {
-                moveRight();
+        // if (Input.GetButtonDown("Horizontal"))
+        // {
+        //     if (Input.GetAxisRaw("Horizontal") < 0)
+        //     {
+        //         moveLeft();
+        //     }
+        //     else
+        //     {
+        //         moveRight();
+        //     }
+        // }
+        // if (Input.GetButtonDown("Jump"))
+        // {
+        //     moveUp();
+        // }
+        // if (Input.GetButtonDown("Vertical"))
+        // {
+        //     if (Input.GetAxisRaw("Vertical") < 0)
+        //     {
+        //         moveDown();
+        //     }
+        //     else
+        //     {
+        //         moveUp();
+        //     }
+        // }
+        KeyCode[] leftKeys = {KeyCode.A,KeyCode.LeftArrow};
+        foreach( KeyCode key in leftKeys ){
+            if(Input.GetKeyDown(key)){
+                 moveLeft();
             }
         }
-        if (Input.GetButtonDown("Jump"))
-        {
-            moveUp();
-        }
-        if (Input.GetButtonDown("Vertical"))
-        {
-            if (Input.GetAxisRaw("Vertical") < 0)
-            {
-                moveDown();
+
+        KeyCode[] rightKeys = {KeyCode.D,KeyCode.RightArrow};
+        foreach( KeyCode key in rightKeys ){
+            if(Input.GetKeyDown(key)){
+                 moveRight();
             }
-            else
-            {
-                moveUp();
+        }
+
+        KeyCode[] upKeys = {KeyCode.Space,KeyCode.W,KeyCode.UpArrow};
+        foreach( KeyCode key in upKeys ){
+            if(Input.GetKeyDown(key)){
+                 moveUp();
+            }
+        }
+
+        KeyCode[] downKeys = {KeyCode.DownArrow,KeyCode.S};
+        foreach( KeyCode key in downKeys ){
+            if(Input.GetKeyDown(key)){
+                 moveDown();
             }
         }
     }

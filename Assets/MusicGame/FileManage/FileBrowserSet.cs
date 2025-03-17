@@ -1,10 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using SimpleFileBrowser;
 using UnityEngine;
-using UnityEngine.Android;
 using UnityEngine.SceneManagement;
 
 public class FileBrowserSet : MonoBehaviour
@@ -22,17 +20,6 @@ public class FileBrowserSet : MonoBehaviour
     }
 
     public void openFileDialog(){
-		#if UNITY_ANDROID
-		// 请求权限
-		if (!Permission.HasUserAuthorizedPermission(Permission.ExternalStorageRead))
-		{
-			Permission.RequestUserPermission(Permission.ExternalStorageRead);
-		}
-		if (!Permission.HasUserAuthorizedPermission(Permission.ExternalStorageWrite))
-		{
-			Permission.RequestUserPermission(Permission.ExternalStorageWrite);
-		}
-        #endif
         StartCoroutine(ShowLoadDialogCoroutine());
     }
 

@@ -51,5 +51,7 @@ public class DataManager
         public bool isAutoPlay;
         public bool notVibrate;
         public int offsetMs;
+        public bool notBoomFX;
+        public bool relaxMod;
     }
 }

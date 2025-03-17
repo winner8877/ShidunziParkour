@@ -39,6 +39,7 @@ public class BeatmapManager : MonoBehaviour
     public GameObject ComboDisplay;
     public GameObject ResultCanvas;
     public GameObject AutoPlayImage;
+    public GameObject RelaxModImage;
 
     // 谱面信息展示
     public RawImage DisplayInfoImage;
@@ -68,6 +69,7 @@ public class BeatmapManager : MonoBehaviour
         public float beat_time;
         public int track;
         public int stack;
+        public int rem_stack;
         public float BPM;
     }
 
@@ -139,33 +141,43 @@ public class BeatmapManager : MonoBehaviour
                 float slice_beat = float.Parse(data[3]) > 0 ? float.Parse(data[2]) / float.Parse(data[3]) : 0;
                 float beat_time = last_time + (float.Parse(data[1]) + slice_beat) * (60 / BPM) + offset;
                 int stack_count = int.Parse(data[5]);
+                int rem_stack = 0;
+                if(data.Count() >= 7){
+                    rem_stack = int.Parse(data[6]);
+                }
                 remain_beats.Add(
                     new SingleBeat(){
                         type = (int)B_TYPE.BEAT_TYPE,
                         beat_time = beat_time,
                         track = int.Parse(data[4]),
-                        stack = stack_count
+                        stack = stack_count,
+                        rem_stack = rem_stack
                     }
                 );
-                MaxPoint += stack_count;
-                FullCombo += stack_count;
+                MaxPoint += stack_count - rem_stack;
+                FullCombo += stack_count - rem_stack;
                 continue;
             }
             if(data[0] == "X"){
                 float slice_beat = float.Parse(data[3]) > 0 ? float.Parse(data[2]) / float.Parse(data[3]) : 0;
                 float beat_time = last_time + (float.Parse(data[1]) + slice_beat) * (60 / BPM) + offset;
                 int stack_count = int.Parse(data[5]);
+                int rem_stack = 0;
+                if(data.Count() >= 7){
+                    rem_stack = int.Parse(data[6]);
+                }
                 remain_beats.Add(
                     new SingleBeat(){
                         type = (int)B_TYPE.BEST_BEAT_TYPE,
                         beat_time = beat_time,
                         track = int.Parse(data[4]),
-                        stack = stack_count
+                        stack = stack_count,
+                        rem_stack = rem_stack
                     }
                 );
-                MaxPoint += stack_count;
-                MaxPlusPoint += stack_count;
-                FullCombo += stack_count;
+                MaxPoint += stack_count - rem_stack;
+                MaxPlusPoint += stack_count - rem_stack;
+                FullCombo += stack_count - rem_stack;
                 continue;
             }
             if(data[0] == "B"){
@@ -233,6 +245,9 @@ public class BeatmapManager : MonoBehaviour
         if(!isAutoPlay){
             AutoPlayImage.SetActive(false);
         }
+        if(!DataStorager.settings.relaxMod){
+            RelaxModImage.SetActive(false);
+        }
     }
 
     // Start is called before the first frame update
@@ -256,7 +271,7 @@ public class BeatmapManager : MonoBehaviour
             Vector3 place_pos;
             place_pos.z = (remain_beats[0].beat_time - OnPlayingTime + BeforeTime) * Player.GetComponent<Player>().GetVelocity() + Player.GetComponent<Player>().GetPos().z;
             place_pos.x = (float)((remain_beats[0].track - 2) * 3);
-            for(int i = 0;i < remain_beats[0].stack; i++){
+            for(int i = remain_beats[0].rem_stack;i < remain_beats[0].stack; i++){
                 place_pos.y = i * 2;
                 GameObject obs;
                 switch(remain_beats[0].type){
@@ -302,7 +317,7 @@ public class BeatmapManager : MonoBehaviour
         }
         if(isEnd && !isSaved){
             ResultCanvas.SetActive(true);
-            if(!isAutoPlay){
+            if(!isAutoPlay && !DataStorager.settings.relaxMod){
                 SaveResult();
             }
             isSaved = true;
@@ -354,7 +369,7 @@ public class BeatmapManager : MonoBehaviour
                     last_change_time = OnPlayingTime - BeforeTime;
                     last_record = true;
                     float switch_time = (auto_remain_beats[0].beat_time - last_change_time) * 1 / 2;
-                    if(switch_time < 0.2){
+                    if(switch_time < 0.25){
                         switch_time = 0;
                     }
                     should_change_time = last_change_time + switch_time;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -22,7 +23,7 @@ public class Player : MonoBehaviour
     public const float MAX_CROSS_TIME = 0.2125f;
     public float cross_time = MAX_CROSS_TIME;
     private bool isFlying = false;
-    private FromTo movement;
+    private List<FromTo> movementList = new();
     void Awake(){
         float speed = DataStorager.settings.MusicGameSpeed > 0 ? DataStorager.settings.MusicGameSpeed : 1;
         velocity.z = 50 * speed;
@@ -69,6 +70,9 @@ public class Player : MonoBehaviour
         loosen_time += Time.deltaTime;
         handleKeyInput();
         handleFingerInput();
+        if(DataStorager.settings.relaxMod){
+            handleNumInput();
+        }
         updateGravity();
     }
 
@@ -172,6 +176,7 @@ public class Player : MonoBehaviour
         public class FromTo
     {
         // Fields
+        public int fingerId;
         public Vector2 first;
         public Vector2 second;
     }
@@ -216,15 +221,55 @@ public class Player : MonoBehaviour
         {
             if (touch.phase == TouchPhase.Began)
             {
-                movement = new FromTo();
-                movement.first = touch.position;
+                FromTo movement = new()
+                {
+                    fingerId = touch.fingerId,
+                    first = touch.position
+                };
+                movementList.Add(movement);
             }
             if (touch.phase == TouchPhase.Ended)
             {
-                movement.second = touch.position;
-                CalcAndResponse(movement);
+
+                for(int k = 0; k < movementList.Count; k++){
+                    FromTo movement = movementList[k];
+                    if(movement.fingerId == touch.fingerId){
+                        movement.second = touch.position;
+                        CalcAndResponse(movement);
+                        movementList.RemoveAt(k);
+                        k--;
+                    }
+                }
             }
         }
+    }
+
+    void handleNumInput(){
+        KeyCode[] firstKeys = {KeyCode.Z,KeyCode.Keypad1,KeyCode.Alpha1};
+        foreach( KeyCode key in firstKeys ){
+            if(Input.GetKeyDown(key)){
+                 moveToIndex(1);
+            }
+        }
+
+        KeyCode[] secondKeys = {KeyCode.X,KeyCode.Keypad2,KeyCode.Alpha2};
+        foreach( KeyCode key in secondKeys ){
+            if(Input.GetKeyDown(key)){
+                 moveToIndex(2);
+            }
+        }
+
+        KeyCode[] thirdKeys = {KeyCode.C,KeyCode.Keypad3,KeyCode.Alpha3};
+        foreach( KeyCode key in thirdKeys ){
+            if(Input.GetKeyDown(key)){
+                 moveToIndex(3);
+            }
+        }
+    }
+
+    void moveToIndex(int index){
+        now_track = index;
+        toMoving = true;
     }
 
     void handleKeyInput()

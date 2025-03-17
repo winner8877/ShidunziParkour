@@ -1,8 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -18,6 +14,8 @@ public class Settings : MonoBehaviour
     public InputField MusicGameSpeed;
     public Toggle isAutoPlay;
     public Toggle notVibrate;
+    public Toggle notBoomFX;
+    public Toggle RelaxMod;
     public InputField MusicGameOffsetMs;
     void Awake(){
         MusicVolume.value = DataStorager.settings.MusicVolume;
@@ -26,6 +24,8 @@ public class Settings : MonoBehaviour
         notShake.isOn = DataStorager.settings.notShake;
         isAutoPlay.isOn = DataStorager.settings.isAutoPlay;
         notVibrate.isOn = DataStorager.settings.notVibrate;
+        notBoomFX.isOn = DataStorager.settings.notBoomFX;
+        RelaxMod.isOn = DataStorager.settings.relaxMod;
         MaxLife.text = DataStorager.maxLife.count.ToString();
         MusicGameOffsetMs.text = DataStorager.settings.offsetMs.ToString();
         if(DataStorager.settings.CustomMaxLife > 0){
@@ -47,6 +47,8 @@ public class Settings : MonoBehaviour
         DataStorager.settings.notShake = notShake.isOn;
         DataStorager.settings.notVibrate = notVibrate.isOn;
         DataStorager.settings.isAutoPlay = isAutoPlay.isOn;
+        DataStorager.settings.notBoomFX = notBoomFX.isOn;
+        DataStorager.settings.relaxMod = RelaxMod.isOn;
         if (!int.TryParse(CustomMaxLife.text, out int clife))
         {
             DataStorager.settings.CustomMaxLife = DataStorager.maxLife.count;

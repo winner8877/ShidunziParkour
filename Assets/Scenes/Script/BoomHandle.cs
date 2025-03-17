@@ -7,7 +7,9 @@ public class BoomHandle : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake(){
         gameObject.GetComponent<AudioSource>().Play();
-        gameObject.GetComponent<ParticleSystem>().Play();
+        if(!DataStorager.settings.notBoomFX){
+            gameObject.GetComponent<ParticleSystem>().Play();
+        }
         StartCoroutine(DestroyAfterDelay());
     }
     void Start()

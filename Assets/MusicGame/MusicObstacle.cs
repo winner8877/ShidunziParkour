@@ -14,6 +14,7 @@ public class MusicObstacle : MonoBehaviour
     public GameObject camera;
     public GameObject perfectboom;
     public GameObject greatboom;
+    public AudioSource bestSound;
     public BeatmapManager beatmapManager;
     // Start is called before the first frame update
     void Start()
@@ -25,6 +26,10 @@ public class MusicObstacle : MonoBehaviour
         camera.GetComponent<MusicCamera>().triggerShake();
         var newboom = Instantiate(theboom);
         newboom.transform.position = gameObject.transform.position + new Vector3(0,2.5f,0);
+
+        if(isBest){
+            bestSound.Play();
+        }
 
         if(!DataStorager.settings.notVibrate){
             HapticPatterns.PlayEmphasis(1.0f, 0.0f);
