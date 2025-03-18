@@ -25,6 +25,7 @@ public class BeatmapManager : MonoBehaviour
     int MaxCombo = 0;
     int FullCombo = 0;
     bool isPlaying = false;
+    bool hasVideo = false;
     bool isVideoPlaying = false;
     bool isEnd = false;
     bool isSaved = false;
@@ -90,6 +91,7 @@ public class BeatmapManager : MonoBehaviour
             videoPlayer.targetTexture = (RenderTexture)BackForVideo.texture;
             videoPlayer.playOnAwake = false;
             videoPlayer.url = $"file://{dataFolder}/{beatmap_name}/bg.mp4";
+            hasVideo = true;
         }
         if(File.Exists($"{dataFolder}/{beatmap_name}/bg.png")){
             byte[] fileData = File.ReadAllBytes($"{dataFolder}/{beatmap_name}/bg.png");
@@ -299,7 +301,7 @@ public class BeatmapManager : MonoBehaviour
         if(remain_beats[0].type == (int)B_TYPE.BPM_TYPE){
             remain_beats.RemoveAt(0);
         }
-        if(!isVideoPlaying){
+        if(hasVideo && !isVideoPlaying){
             if(-BeforeTime + OnPlayingTime >= videoOffset){
                 videoPlayer.Play();
                 BackForVideo.GetComponent<AspectRatioFitter>().aspectRatio = (float)videoPlayer.width / videoPlayer.height;
