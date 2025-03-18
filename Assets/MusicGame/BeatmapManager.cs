@@ -50,7 +50,6 @@ public class BeatmapManager : MonoBehaviour
     bool last_record = false;
     float last_change_time;
     float should_change_time;
-    bool isJumped = false;
     bool ready_to_change_bpm = false;
     float should_change_bpm = 0;
     float should_change_bpm_time = 0;
@@ -354,14 +353,13 @@ public class BeatmapManager : MonoBehaviour
                 return;
             }
             // 先判断是不是需要大跳
-            if(auto_remain_beats[0].stack > 1 && !isJumped){
-                float jump_should_remain_time = (float)Math.Sqrt(auto_remain_beats[0].stack * 2 / Player.GetComponent<Player>().GetGravity());
-                if(OnPlayingTime + jump_should_remain_time > auto_remain_beats[0].beat_time){
+            if(auto_remain_beats[0].stack > 1 && Player.GetComponent<Player>().GetPos().y < 0.01f){
+                float jump_should_remain_time = (float)Math.Sqrt(Math.Pow(2,((int)Math.Log(auto_remain_beats[0].stack,2) + 1)) * 2 / Player.GetComponent<Player>().GetGravity());
+                if((Player.GetComponent<Player>().GetPos().z + 1) / Player.GetComponent<Player>().GetVelocity() + jump_should_remain_time > auto_remain_beats[0].beat_time + 3){
                     int jump_times = (int)Math.Log(auto_remain_beats[0].stack,2);
                     for(int k = 0;k < jump_times; k++){
                         Player.GetComponent<Player>().moveUp();
                     }
-                    isJumped = true;
                 }
             }
             if(Player.GetComponent<Player>().GetNowTrack() != auto_remain_beats[0].track){
@@ -392,7 +390,6 @@ public class BeatmapManager : MonoBehaviour
         if(this.Player.GetComponent<Player>().GetPos().z + 1f >= (this.auto_remain_beats[0].beat_time + 3f) * this.Player.GetComponent<Player>().GetVelocity() && auto_remain_beats[0].type != (int)B_TYPE.FINISH){
             if(this.Player.GetComponent<Player>().GetPos().y > 0.1f && isAutoPlay){
                 Player.GetComponent<Player>().moveDown();
-                isJumped = false;
             }
 
             // 设置跨越速度
