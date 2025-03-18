@@ -390,7 +390,7 @@ public class BeatmapManager : MonoBehaviour
             }
         }
         if(this.Player.GetComponent<Player>().GetPos().z + 1f >= (this.auto_remain_beats[0].beat_time + 3f) * this.Player.GetComponent<Player>().GetVelocity() && auto_remain_beats[0].type != (int)B_TYPE.FINISH){
-            if(this.Player.GetComponent<Player>().GetPos().y && isAutoPlay){
+            if(this.Player.GetComponent<Player>().GetPos().y > 0.1f && isAutoPlay){
                 Player.GetComponent<Player>().moveDown();
                 isJumped = false;
             }
