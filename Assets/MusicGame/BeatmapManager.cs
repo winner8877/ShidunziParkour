@@ -269,7 +269,7 @@ public class BeatmapManager : MonoBehaviour
 
         while( detect_list.Contains(remain_beats[0].type) && remain_beats[0].beat_time - OnPlayingTime + BeforeTime < 5){
             Vector3 place_pos;
-            place_pos.z = (remain_beats[0].beat_time - OnPlayingTime + BeforeTime) * Player.GetComponent<Player>().GetVelocity() + Player.GetComponent<Player>().GetPos().z;
+            place_pos.z = (this.remain_beats[0].beat_time + 3f) * this.Player.GetComponent<Player>().GetVelocity();
             place_pos.x = (float)((remain_beats[0].track - 2) * 3);
             for(int i = remain_beats[0].rem_stack;i < remain_beats[0].stack; i++){
                 place_pos.y = i * 2;
@@ -389,8 +389,8 @@ public class BeatmapManager : MonoBehaviour
                 }
             }
         }
-        if(OnPlayingTime - BeforeTime >= auto_remain_beats[0].beat_time && auto_remain_beats[0].type != (int)B_TYPE.FINISH){
-            if(auto_remain_beats[0].stack > 1 && isAutoPlay){
+        if(this.Player.GetComponent<Player>().GetPos().z + 1f >= (this.auto_remain_beats[0].beat_time + 3f) * this.Player.GetComponent<Player>().GetVelocity() && auto_remain_beats[0].type != (int)B_TYPE.FINISH){
+            if(this.Player.GetComponent<Player>().GetPos().y && isAutoPlay){
                 Player.GetComponent<Player>().moveDown();
                 isJumped = false;
             }
