@@ -14,6 +14,7 @@ public class BeatmapManager : MonoBehaviour
 {
     float OnPlayingTime = 0;
     float BeforeTime = 3;
+    float iniOffset = 3;
     float BPM = 0;
     float offset = DataStorager.settings.offsetMs / 1000;
     float videoOffset = 0;
@@ -54,6 +55,7 @@ public class BeatmapManager : MonoBehaviour
     bool ready_to_change_bpm = false;
     float should_change_bpm = 0;
     float should_change_bpm_time = 0;
+    float autoShift = 1;
 
     string dataFolder;
 
@@ -270,7 +272,7 @@ public class BeatmapManager : MonoBehaviour
 
         while( detect_list.Contains(remain_beats[0].type) && remain_beats[0].beat_time - OnPlayingTime + BeforeTime < 5){
             Vector3 place_pos;
-            place_pos.z = (this.remain_beats[0].beat_time + 3f) * this.Player.GetComponent<Player>().GetVelocity();
+            place_pos.z = (remain_beats[0].beat_time + iniOffset) * Player.GetComponent<Player>().GetVelocity();
             place_pos.x = (float)((remain_beats[0].track - 2) * 3);
             for(int i = remain_beats[0].rem_stack;i < remain_beats[0].stack; i++){
                 place_pos.y = i * 2;
@@ -357,7 +359,7 @@ public class BeatmapManager : MonoBehaviour
             // 先判断是不是需要大跳
             if(auto_remain_beats[0].stack > 1 && Player.GetComponent<Player>().GetPos().y < 0.01f){
                 float jump_should_remain_time = (float)Math.Sqrt(Math.Pow(2,((int)Math.Log(auto_remain_beats[0].stack,2) + 1)) * 2 / Player.GetComponent<Player>().GetGravity());
-                if((Player.GetComponent<Player>().GetPos().z + 1) / Player.GetComponent<Player>().GetVelocity() + jump_should_remain_time > auto_remain_beats[0].beat_time + 3){
+                if((Player.GetComponent<Player>().GetPos().z + autoShift) / Player.GetComponent<Player>().GetVelocity() + jump_should_remain_time > auto_remain_beats[0].beat_time + iniOffset){
                     int jump_times = (int)Math.Log(auto_remain_beats[0].stack,2);
                     for(int k = 0;k < jump_times; k++){
                         Player.GetComponent<Player>().moveUp();
@@ -389,8 +391,8 @@ public class BeatmapManager : MonoBehaviour
                 }
             }
         }
-        if(this.Player.GetComponent<Player>().GetPos().z + 1f >= (this.auto_remain_beats[0].beat_time + 3f) * this.Player.GetComponent<Player>().GetVelocity() && auto_remain_beats[0].type != (int)B_TYPE.FINISH){
-            if(this.Player.GetComponent<Player>().GetPos().y > 0.1f && isAutoPlay){
+        if(Player.GetComponent<Player>().GetPos().z + autoShift >= (auto_remain_beats[0].beat_time + iniOffset) * Player.GetComponent<Player>().GetVelocity() && auto_remain_beats[0].type != (int)B_TYPE.FINISH){
+            if(Player.GetComponent<Player>().GetPos().y > 0.1f && isAutoPlay){
                 Player.GetComponent<Player>().moveDown();
             }
 
