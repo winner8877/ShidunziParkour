@@ -55,7 +55,7 @@ public class BeatmapManager : MonoBehaviour
     bool ready_to_change_bpm = false;
     float should_change_bpm = 0;
     float should_change_bpm_time = 0;
-    float autoShift = 1;
+    float autoShift = 0.0f;
 
     string dataFolder;
 
@@ -358,8 +358,8 @@ public class BeatmapManager : MonoBehaviour
             }
             // 先判断是不是需要大跳
             if(auto_remain_beats[0].stack > 1 && Player.GetComponent<Player>().GetPos().y < 0.01f){
-                float jump_should_remain_time = (float)Math.Sqrt(Math.Pow(2,((int)Math.Log(auto_remain_beats[0].stack,2) + 1)) * 2 / Player.GetComponent<Player>().GetGravity());
-                if((Player.GetComponent<Player>().GetPos().z + autoShift) / Player.GetComponent<Player>().GetVelocity() + jump_should_remain_time > auto_remain_beats[0].beat_time + iniOffset){
+                float jump_should_remain_time = (float)Math.Sqrt(Math.Pow(2,(int)Math.Log(auto_remain_beats[0].stack,2) + 1) * 2 / Player.GetComponent<Player>().GetGravity());
+                if(Player.GetComponent<Player>().GetPos().z / Player.GetComponent<Player>().GetVelocity() + jump_should_remain_time - autoShift > auto_remain_beats[0].beat_time + iniOffset){
                     int jump_times = (int)Math.Log(auto_remain_beats[0].stack,2);
                     for(int k = 0;k < jump_times; k++){
                         Player.GetComponent<Player>().moveUp();
@@ -391,7 +391,7 @@ public class BeatmapManager : MonoBehaviour
                 }
             }
         }
-        if(Player.GetComponent<Player>().GetPos().z + autoShift >= (auto_remain_beats[0].beat_time + iniOffset) * Player.GetComponent<Player>().GetVelocity() && auto_remain_beats[0].type != (int)B_TYPE.FINISH){
+        if(Player.GetComponent<Player>().GetPos().z >= (auto_remain_beats[0].beat_time + iniOffset - autoShift) * Player.GetComponent<Player>().GetVelocity() && auto_remain_beats[0].type != (int)B_TYPE.FINISH){
             if(Player.GetComponent<Player>().GetPos().y > 0.1f && isAutoPlay){
                 Player.GetComponent<Player>().moveDown();
             }
