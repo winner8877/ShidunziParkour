@@ -38,11 +38,14 @@ public class BeatmapManager : MonoBehaviour
     public AudioSource MusicPlayer;
     public RawImage BackForVideo;
     public RawImage BackForImage;
+    public RawImage BackForVideo2;
+    public RawImage BackForImage2;
     public VideoPlayer videoPlayer;
     public GameObject ComboDisplay;
     public GameObject ResultCanvas;
     public GameObject AutoPlayImage;
     public GameObject RelaxModImage;
+    public Animator ShowFrontVideo;
 
     // 谱面信息展示
     public RawImage DisplayInfoImage;
@@ -54,8 +57,10 @@ public class BeatmapManager : MonoBehaviour
     float last_change_time;
     float should_change_time;
     bool ready_to_change_bpm = false;
+    bool ready_to_change_hidden = false;
     float should_change_bpm = 0;
     float should_change_bpm_time = 0;
+    float should_change_hidden_time = 0;
     float autoShift = 0.0f;
 
     string dataFolder;
@@ -65,6 +70,7 @@ public class BeatmapManager : MonoBehaviour
         BEST_BEAT_TYPE,
         GAINT_BEAT_TYPE,
         BPM_TYPE,
+        HIDE_FRONT_TYPE,
         FINISH,
     }
     struct SingleBeat {
@@ -102,7 +108,9 @@ public class BeatmapManager : MonoBehaviour
             Texture2D texture = new Texture2D(2, 2);
             texture.LoadImage(fileData); // 自动调整纹理大小
             BackForImage.texture = texture;
+            BackForImage2.texture = texture;
             BackForImage.GetComponent<AspectRatioFitter>().aspectRatio = (float)texture.width / texture.height;
+            BackForImage2.GetComponent<AspectRatioFitter>().aspectRatio = (float)texture.width / texture.height;
             DisplayInfoImage.texture = texture;
             DisplayInfoImage.GetComponent<AspectRatioFitter>().aspectRatio = (float)texture.width / texture.height;
         }
@@ -205,6 +213,17 @@ public class BeatmapManager : MonoBehaviour
                         type = (int)B_TYPE.BPM_TYPE,
                         beat_time = beat_time,
                         BPM = float.Parse(data[4])
+                    }
+                );
+                continue;
+            }
+            if(data[0] == "H"){
+                float slice_beat = float.Parse(data[3]) > 0 ? float.Parse(data[2]) / float.Parse(data[3]) : 0;
+                float beat_time = last_time + (float.Parse(data[1]) + slice_beat) * (60 / BPM) + offset;
+                remain_beats.Add(
+                    new SingleBeat(){
+                        type = (int)B_TYPE.HIDE_FRONT_TYPE,
+                        beat_time = beat_time,
                     }
                 );
                 continue;
@@ -334,13 +353,14 @@ public class BeatmapManager : MonoBehaviour
             }
             remain_beats.RemoveAt(0);
         }
-        if(remain_beats[0].type == (int)B_TYPE.BPM_TYPE){
+        if(remain_beats[0].type == (int)B_TYPE.BPM_TYPE || remain_beats[0].type == (int)B_TYPE.HIDE_FRONT_TYPE){
             remain_beats.RemoveAt(0);
         }
         if(hasVideo && !isVideoPlaying){
             if(-BeforeTime + OnPlayingTime >= videoOffset){
                 videoPlayer.Play();
                 BackForVideo.GetComponent<AspectRatioFitter>().aspectRatio = (float)videoPlayer.width / videoPlayer.height;
+                BackForVideo2.GetComponent<AspectRatioFitter>().aspectRatio = (float)videoPlayer.width / videoPlayer.height;
             }
         }
 
@@ -379,10 +399,21 @@ public class BeatmapManager : MonoBehaviour
             should_change_bpm = auto_remain_beats[0].BPM;
             auto_remain_beats.RemoveAt(0);
         }
+        if(auto_remain_beats[0].type == (int)B_TYPE.HIDE_FRONT_TYPE){
+            ready_to_change_hidden = true;
+            should_change_hidden_time = auto_remain_beats[0].beat_time;
+            auto_remain_beats.RemoveAt(0);
+        }
         if(ready_to_change_bpm){
             if(OnPlayingTime - BeforeTime >= should_change_bpm_time){
                 BPM = should_change_bpm;
                 ready_to_change_bpm = false;
+            }
+        }
+        if(ready_to_change_hidden){
+            if(OnPlayingTime - BeforeTime >= should_change_bpm_time){
+                ShowFrontVideo.SetBool("ShowBool",!ShowFrontVideo.GetBool("ShowBool"));
+                ready_to_change_hidden = false;
             }
         }
         if(isAutoPlay){
@@ -432,7 +463,7 @@ public class BeatmapManager : MonoBehaviour
             }
 
             // 设置跨越速度
-            if(auto_remain_beats[1].type != (int)B_TYPE.FINISH){
+            if(detect_list.Contains(auto_remain_beats[1].type)){
                 Player.GetComponent<Player>().setCrossTime(auto_remain_beats[1].beat_time - auto_remain_beats[0].beat_time);
             }
 
