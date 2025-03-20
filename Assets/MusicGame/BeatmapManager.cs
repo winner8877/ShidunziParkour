@@ -293,6 +293,7 @@ public class BeatmapManager : MonoBehaviour
                     }
                 };
                 obs.GetComponent<MusicObstacle>().setNote();
+                obs.GetComponent<MusicObstacle>().track = remain_beats[0].track;
                 obs.transform.position = place_pos;
                 if(remain_beats[1].type == (int)B_TYPE.FINISH){
                     obs.GetComponent<MusicObstacle>().setLastNote();
