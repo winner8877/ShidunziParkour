@@ -26,10 +26,10 @@ public class Player : MonoBehaviour
     private bool isFlying = false;
     private List<FromTo> movementList = new();
 
-    public Queue<InputImpluse> inputImpluses = new();
+    public List<InputImpluse> inputImpluses = new();
 
     void CreateNewInputImpluse(int num) {
-        inputImpluses.Enqueue(
+        inputImpluses.Add(
             new InputImpluse(){
                 track = num,
                 time = Time.fixedTime
@@ -39,10 +39,10 @@ public class Player : MonoBehaviour
 
     void inputUpdate() {
         while(inputImpluses.Count > 0){
-            if(Time.fixedTime - inputImpluses.Peek().time <= 0.1){
+            if(Time.fixedTime - inputImpluses[0].time <= 0.1){
                 break;
             }
-            inputImpluses.Dequeue();
+            inputImpluses.RemoveAt(0);
         }
     }
 

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -69,9 +70,10 @@ public class BeatmapManager : MonoBehaviour
     struct SingleBeat {
         public int type;
         public float beat_time;
-        public int track;
+        public float track;
         public int stack;
         public int rem_stack;
+        public float size;
         public float BPM;
     }
 
@@ -145,16 +147,21 @@ public class BeatmapManager : MonoBehaviour
                 float beat_time = last_time + (float.Parse(data[1]) + slice_beat) * (60 / BPM) + offset;
                 int stack_count = int.Parse(data[5]);
                 int rem_stack = 0;
+                float size = 1;
                 if(data.Count() >= 7){
                     rem_stack = int.Parse(data[6]);
+                }
+                if(data.Count() >= 8){
+                    size = float.Parse(data[7]);
                 }
                 remain_beats.Add(
                     new SingleBeat(){
                         type = (int)B_TYPE.BEAT_TYPE,
                         beat_time = beat_time,
-                        track = int.Parse(data[4]),
+                        track = float.Parse(data[4]),
                         stack = stack_count,
-                        rem_stack = rem_stack
+                        rem_stack = rem_stack,
+                        size = size
                     }
                 );
                 MaxPoint += stack_count - rem_stack;
@@ -166,16 +173,21 @@ public class BeatmapManager : MonoBehaviour
                 float beat_time = last_time + (float.Parse(data[1]) + slice_beat) * (60 / BPM) + offset;
                 int stack_count = int.Parse(data[5]);
                 int rem_stack = 0;
+                float size = 1;
                 if(data.Count() >= 7){
                     rem_stack = int.Parse(data[6]);
+                }
+                if(data.Count() >= 8){
+                    size = float.Parse(data[7]);
                 }
                 remain_beats.Add(
                     new SingleBeat(){
                         type = (int)B_TYPE.BEST_BEAT_TYPE,
                         beat_time = beat_time,
-                        track = int.Parse(data[4]),
+                        track = float.Parse(data[4]),
                         stack = stack_count,
-                        rem_stack = rem_stack
+                        rem_stack = rem_stack,
+                        size = size
                     }
                 );
                 MaxPoint += stack_count - rem_stack;
@@ -264,6 +276,23 @@ public class BeatmapManager : MonoBehaviour
         (int)B_TYPE.BEST_BEAT_TYPE
     };
 
+
+    bool Intersects(float a1, float b1, float a2, float b2)
+    {
+        return (a1 < b2) && (a2 < b1);
+    }
+
+    int[] toTouchTracks(float track, float size = 1){
+        List<int> move_tracks = new();
+        float left_track = 2 * track - size;
+        float right_track = 2 * track + size;
+        for(int k = 1;k <= 3;k ++){
+            if(Intersects(left_track, right_track, k * 2 - 1, k * 2 + 1)){
+                move_tracks.Add(k);
+            }
+        }
+        return move_tracks.ToArray();
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -293,8 +322,12 @@ public class BeatmapManager : MonoBehaviour
                     }
                 };
                 obs.GetComponent<MusicObstacle>().setNote();
-                obs.GetComponent<MusicObstacle>().track = remain_beats[0].track;
+                obs.GetComponent<MusicObstacle>().track = toTouchTracks(remain_beats[0].track, remain_beats[0].size);
                 obs.transform.position = place_pos;
+                obs.transform.localScale *= remain_beats[0].size;
+                if(remain_beats[0].size != 1){
+                    obs.transform.localScale *= (float)4 / 3;
+                }
                 if(remain_beats[1].type == (int)B_TYPE.FINISH){
                     obs.GetComponent<MusicObstacle>().setLastNote();
                 }
@@ -367,7 +400,8 @@ public class BeatmapManager : MonoBehaviour
                     }
                 }
             }
-            if(Player.GetComponent<Player>().GetNowTrack() != auto_remain_beats[0].track){
+            int[] should_tracks = toTouchTracks(auto_remain_beats[0].track, remain_beats[0].size);
+            if(!should_tracks.Contains(Player.GetComponent<Player>().GetNowTrack()) && (should_tracks.Count() > 0)){
                 if(!last_record){
                     last_change_time = OnPlayingTime - BeforeTime;
                     last_record = true;
@@ -378,7 +412,7 @@ public class BeatmapManager : MonoBehaviour
                     should_change_time = last_change_time + switch_time;
                 }
                 if(OnPlayingTime - BeforeTime >= should_change_time){
-                    int should_move_times = auto_remain_beats[0].track - Player.GetComponent<Player>().GetNowTrack();
+                    int should_move_times = should_tracks[0] - Player.GetComponent<Player>().GetNowTrack();
                     // 移动
                     if(should_move_times > 0){
                         for(int j = 0; j < should_move_times; j++){

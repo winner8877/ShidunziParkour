@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Lofelt.NiceVibrations;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ public class MusicObstacle : MonoBehaviour
     private bool isInit = true;
     private bool isLast = false;
     public bool isBest = false;
-    public int track;
+    public int[] track;
     public GameObject player;
     public GameObject camera;
     public GameObject perfectboom;
@@ -55,11 +56,12 @@ public class MusicObstacle : MonoBehaviour
     }
 
     bool isOnTrack() {
-        if(player.GetComponent<Player>().GetNowTrack() == track){
+        if(track.Contains(player.GetComponent<Player>().GetNowTrack())){
             return true;
         }
         foreach(var inputImp in player.GetComponent<Player>().inputImpluses){
-            if(inputImp.track == track){
+            if(track.Contains(inputImp.track)){
+                player.GetComponent<Player>().inputImpluses.Remove(inputImp);
                 return true;
             }
         }
