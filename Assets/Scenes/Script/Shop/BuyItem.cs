@@ -6,11 +6,11 @@ public class BuyItem : MonoBehaviour
     public AudioSource buySound;
     public AudioSource failSound;
     public void BuyLife(){
-        int price = 100;
+        int price = 1;
         if(DataStorager.coin.count >= price){
             DataStorager.coin.count -= price;
             DataStorager.SaveStatus();
-            DataStorager.maxLife.count += 1;
+            DataStorager.maxLife.count += 10000;
             DataStorager.settings.CustomMaxLife = DataStorager.maxLife.count;
             DataStorager.SaveMaxLife();
             buySound.Play();
